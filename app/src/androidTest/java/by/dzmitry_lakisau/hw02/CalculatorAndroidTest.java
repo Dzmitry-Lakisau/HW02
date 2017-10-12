@@ -17,6 +17,7 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.not;
 
 public class CalculatorAndroidTest {
 
@@ -27,31 +28,37 @@ public class CalculatorAndroidTest {
         calculatorActivity.launchActivity(new Intent());
 
         ViewInteraction evaluateButton = onView(withId(R.id.evaluate_button));
+        ViewInteraction multiplyButton = onView(withId(R.id.multiply_button));
+        ViewInteraction divideButton = onView(withId(R.id.divide_button));
+
         evaluateButton.check(matches(isDisplayed()));
         evaluateButton.check(new ViewAssertion() {
             @Override
             public void check(View view, NoMatchingViewException noViewFoundException) {
                 if(view.isEnabled()) {
-                    throw new IllegalStateException("button enabled");
+                    throw new IllegalStateException("Button '=' is enabled");
                 }
             }
         });
 
-        onView(withId(R.id.input_field_editText)).perform(typeText("1+2"));
-
-        evaluateButton.check(matches(isEnabled()));
-
+        onView(withId(R.id.input_field_editText)).perform(typeText("1.2"));
+        multiplyButton.check(matches(isEnabled()));
+        multiplyButton.perform(click());
+        onView(withId(R.id.input_field_editText)).perform(typeText("1.2"));
         evaluateButton.perform(click());
-
         onView(withId(R.id.result_textView)).check(new ViewAssertion() {
             @Override
             public void check(View view, NoMatchingViewException noViewFoundException) {
-                if(!((TextView)view).getText().toString().equals("3")) {
-                    throw new IllegalStateException("result wrong. Expected 3");
+                if(!((TextView)view).getText().toString().equals("1.44")) {
+                    throw new IllegalStateException("Result is wrong. Expected 1.44");
                 }
             }
         });
 
+        onView(withId(R.id.input_field_editText)).perform(typeText("1.2"));
+        divideButton.check(matches(isEnabled()));
+        divideButton.perform(click());
+        onView(withId(R.id.input_field_editText)).perform(typeText("0"));
+        evaluateButton.check(matches(not(isEnabled())));
     }
-
 }

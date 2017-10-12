@@ -33,6 +33,7 @@ public class CalculatorActivity extends AppCompatActivity {
 
 
     private void initView() {
+        mCurrentOperation = "";
         mInputEditText = (EditText) findViewById(R.id.input_field_editText);
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mEvaluateButton = findViewById(R.id.evaluate_button);
@@ -41,12 +42,49 @@ public class CalculatorActivity extends AppCompatActivity {
         mMinusButton = findViewById(R.id.minus_button);
         mDivideButton = findViewById(R.id.divide_button);
 
+        mEvaluateButton.setEnabled(false);
+        toggleButtons(false);
+
+        mInputEditText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+                if (mCurrentOperation.equals("")){//first number to input
+                    mEvaluateButton.setEnabled(false);
+                    toggleButtons(true);
+                    mFirstNumber = Float.parseFloat(mInputEditText.getText().toString());
+                }
+                else {
+                    if (!(editable.toString().equals(""))){//second number to input
+                        mSecondNumber = Float.parseFloat(editable.toString());
+                        if(!(mCurrentOperation.equals("/") && mSecondNumber == 0)) {
+                            mEvaluateButton.setEnabled(true);//current operation is not "/0"
+                        }
+                        else {
+                            mEvaluateButton.setEnabled(false);//prevent from division by zero
+                        }
+                    }
+                }
+            }
+        });
+
         mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mCurrentOperation = "+";
-                mFirstNumber = Float.parseFloat(mInputEditText.getText().toString());
-                mInputEditText.setText("");
+                clearInputField();
+                toggleButtons(false);
             }
         });
 
@@ -54,8 +92,8 @@ public class CalculatorActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentOperation = "-";
-                mFirstNumber = Float.parseFloat(mInputEditText.getText().toString());
-                mInputEditText.setText("");
+                clearInputField();
+                toggleButtons(false);
             }
         });
 
@@ -63,8 +101,8 @@ public class CalculatorActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentOperation = "*";
-                mFirstNumber = Float.parseFloat(mInputEditText.getText().toString());
-                mInputEditText.setText("");
+                clearInputField();
+                toggleButtons(false);
             }
         });
 
@@ -72,8 +110,8 @@ public class CalculatorActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentOperation = "/";
-                mFirstNumber = Float.parseFloat(mInputEditText.getText().toString());
-                mInputEditText.setText("");
+                clearInputField();
+                toggleButtons(false);
             }
         });
 
@@ -84,7 +122,7 @@ public class CalculatorActivity extends AppCompatActivity {
 
                 String res = "";
 
-                mSecondNumber =  Float.parseFloat(mInputEditText.getText().toString());
+                mSecondNumber = Float.parseFloat(mInputEditText.getText().toString());
                 switch (mCurrentOperation){
                     case "+":
                         res = mCalculator.add(mFirstNumber, mSecondNumber);
@@ -100,12 +138,26 @@ public class CalculatorActivity extends AppCompatActivity {
                         break;
                 }
                 showResult(res);
-                mInputEditText.setText("");
+                clearInputField();
+                mCurrentOperation = "";
+                mEvaluateButton.setEnabled(false);
+                toggleButtons(false);
             }
         });
     }
 
     private void showResult(String result) {
         mResultTextView.setText(result);
+    }
+
+    private void toggleButtons(boolean state){
+        mAddButton.setEnabled(state);
+        mMultiplyButton.setEnabled(state);
+        mMinusButton.setEnabled(state);
+        mDivideButton.setEnabled(state);
+    }
+
+    private void clearInputField(){
+        mInputEditText.setText("");
     }
 }
